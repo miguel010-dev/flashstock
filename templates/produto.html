@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>{{ produto.nome }} | Flash Stock Móveis Planejados</title>
+<meta name="description" content="{{ produto.descricao[:150] }}">
+<meta name="theme-color" content="#050C17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="{{ url_for('index') }}" class="logo">
+      <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="Flash Stock" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback" style="display:none;">FLASH STOCK</span>
+    </a>
+    <nav class="main-nav">
+      <a href="{{ url_for('index') }}">Início</a>
+      <a href="{{ url_for('catalogo') }}" class="active">Catálogo</a>
+      <a href="{{ url_for('sobre') }}">Sobre</a>
+      <a href="{{ url_for('index') }}#cta">Contato</a>
+    </nav>
+    <div class="header-actions">
+      <a href="{{ url_for('index') }}#cta" class="btn-header">Solicitar Projeto</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-drawer" id="navDrawer">
+  <a href="{{ url_for('index') }}">Início</a>
+  <a href="{{ url_for('catalogo') }}">Catálogo</a>
+  <a href="{{ url_for('sobre') }}">Sobre</a>
+  <a href="{{ url_for('index') }}#cta">Contato</a>
+  <a href="{{ url_for('index') }}#cta" class="btn-gold">Solicitar Projeto</a>
+</nav>
+
+<main>
+<section class="produto-hero">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{{ url_for('catalogo') }}">Catálogo</a> / <a href="{{ url_for('catalogo', categoria=produto.categoria) }}">{{ produto.categoria }}</a> / {{ produto.nome }}
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:24px;">
+  <div class="container grid-2" style="align-items:start;">
+    <div class="produto-gallery">
+      <div class="thumbs" id="thumbs">
+        {% for img in imagens %}
+        <img src="{{ url_for('static', filename='uploads/' ~ img.filename) }}" class="{{ 'active' if loop.first }}" onclick="trocarImagem('{{ url_for('static', filename='uploads/' ~ img.filename) }}', this)" alt="Foto {{ loop.index }} de {{ produto.nome }}">
+        {% endfor %}
+      </div>
+      <div class="main-img">
+        {% if imagens %}
+        <img id="mainImg" src="{{ url_for('static', filename='uploads/' ~ imagens[0].filename) }}" alt="{{ produto.nome }}">
+        {% else %}
+        <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#4a5a78;">Sem imagem disponível</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="produto-info">
+      <span class="categoria-tag">{{ produto.categoria }}</span>
+      <h1>{{ produto.nome }}</h1>
+      <p class="desc">{{ produto.descricao }}</p>
+
+      <div class="spec-grid">
+        <div class="spec-item"><span>Largura</span><strong>{{ produto.largura_min }} – {{ produto.largura_max }} cm</strong></div>
+        <div class="spec-item"><span>Altura</span><strong>{{ produto.altura_min }} – {{ produto.altura_max }} cm</strong></div>
+        <div class="spec-item"><span>Profundidade</span><strong>{{ produto.profundidade_min }} – {{ produto.profundidade_max }} cm</strong></div>
+        <div class="spec-item"><span>Material</span><strong>{{ produto.material or '—' }}</strong></div>
+        <div class="spec-item"><span>Acabamento</span><strong>{{ produto.acabamento or '—' }}</strong></div>
+        <div class="spec-item"><span>Prazo de produção</span><strong>{{ produto.prazo_producao_dias and (produto.prazo_producao_dias ~ ' dias') or 'Sob consulta' }}</strong></div>
+      </div>
+
+      {% if produto.preco_estimado %}
+      <p style="color:var(--gold-light);font-size:1.4rem;font-weight:600;margin-bottom:24px;">A partir de R$ {{ '%.2f'|format(produto.preco_estimado)|replace('.', ',') }}</p>
+      {% endif %}
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;">
+        <a href="https://wa.me/5511969183002?text=Ol%C3%A1!%20Tenho%20interesse%20no%20projeto%20{{ produto.nome | urlencode }}" target="_blank" rel="noopener" class="btn-gold">Solicitar Orçamento</a>
+        <a href="{{ url_for('catalogo') }}" class="btn-outline">Voltar ao Catálogo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% if relacionados %}
+<section style="border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="section-title">
+      <span class="eyebrow">MAIS EM {{ produto.categoria|upper }}</span>
+      <h2>Projetos relacionados</h2>
+    </div>
+    <div class="grid-3">
+      {% for r in relacionados %}
+      <a href="{{ url_for('produto_detalhe', produto_id=r.id) }}" class="produto-card">
+        <div class="thumb">
+          {% if r.capa %}<img src="{{ url_for('static', filename='uploads/' ~ r.capa) }}" alt="{{ r.nome }}" loading="lazy">
+          {% else %}<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#4a5a78;">Sem imagem</div>{% endif %}
+        </div>
+        <div class="info">
+          <span class="categoria">{{ r.categoria }}</span>
+          <h3>{{ r.nome }}</h3>
+          <div class="ver-mais">Ver detalhes <span>&rarr;</span></div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>&copy; {{ ano }} Flash Stock Móveis Planejados. Todos os direitos reservados.</p>
+    <p style="margin-top:8px;"><a href="{{ url_for('sobre') }}">Sobre Nós</a> · <a href="{{ url_for('index') }}#cta">Contato</a> · <a href="{{ url_for('login') }}">Área Restrita</a></p>
+  </div>
+</footer>
+
+<a href="https://wa.me/5511969183002" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.5-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.4.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.2 3.4 5.3 4.7.7.3 1.3.5 1.8.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.3-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.5-1.2l-.3-.2-3.2.8.8-3.1-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
+</a>
+
+<script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+<script>
+function trocarImagem(src, el){
+  document.getElementById('mainImg').src = src;
+  document.querySelectorAll('#thumbs img').forEach(function(i){ i.classList.remove('active'); });
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

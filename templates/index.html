@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Flash Stock | Móveis Planejados</title>
+<meta name="description" content="Projetos exclusivos de móveis planejados, cozinhas, closets, dormitórios e ambientes personalizados.">
+<meta name="theme-color" content="#050C17">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!--
+  Bibliotecas carregadas no <head> (sem defer) para garantir que
+  window.gsap, ScrollTrigger e Lenis já existam antes do script
+  do site rodar.
+-->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1/bundled/lenis.min.js"></script>
+
+<style>
+/*==================================================
+FLASH STOCK — Premium Architecture UI (v2 — otimizado)
+==================================================*/
+
+:root{
+  --navy:#081B3A;
+  --navy2:#0C234D;
+  --gold:#C8A34D;
+  --gold-light:#E5C56D;
+  --white:#FFFFFF;
+  --gray:#C9D0DD;
+  --background:#050C17;
+  --glass:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.09);
+  --shadow:0 40px 100px rgba(0,0,0,.45);
+  --transition:.55s cubic-bezier(.22,.61,.36,1);
+  --radius:24px;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+
+html{ scroll-behavior:auto; }
+
+body{
+  background:var(--background);
+  font-family:Poppins,sans-serif;
+  color:white;
+  overflow-x:hidden;
+}
+
+body.no-scroll{ overflow:hidden; }
+
+@media (hover:hover) and (pointer:fine){
+  body{ cursor:none; }
+}
+
+body::before{
+  content:"";
+  position:fixed;
+  width:100%;
+  height:100%;
+  left:0;
+  top:0;
+  pointer-events:none;
+  background:
+    radial-gradient(circle at top right,rgba(200,163,77,.08),transparent 35%),
+    radial-gradient(circle at bottom left,rgba(14,48,95,.28),transparent 45%);
+  z-index:-3;
+}
+
+img{ max-width:100%; display:block; }
+a{ text-decoration:none; color:inherit; }
+.container{ width:min(1280px,92%); margin:auto; }
+section{ padding:140px 0; position:relative; }
+
+::-webkit-scrollbar{ width:12px; }
+::-webkit-scrollbar-track{ background:#071321; }
+::-webkit-scrollbar-thumb{ background:linear-gradient(var(--gold),#997329); border-radius:999px; }
+
+/* foco visível para navegação por teclado */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible{
+  outline:2px solid var(--gold-light);
+  outline-offset:4px;
+  border-radius:6px;
+}
+
+.cursor{
+  position:fixed;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:var(--gold);
+  pointer-events:none;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:difference;
+  z-index:99999;
+  transition:transform .2s;
+  display:none;
+}
+@media (hover:hover) and (pointer:fine){
+  .cursor{ display:block; }
+}
+
+#loader{
+  position:fixed;
+  inset:0;
+  background:#03060A;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:999999;
+}
+
+.loader-logo{
+  font-size:42px;
+  font-family:Montserrat;
+  letter-spacing:14px;
+  font-weight:700;
+  color:transparent;
+  -webkit-text-stroke:1px var(--gold);
+  animation:pulse 2.4s infinite;
+}
+
+@keyframes pulse{
+  0%{ opacity:.2; transform:scale(.98); }
+  50%{ opacity:1; transform:scale(1); }
+  100%{ opacity:.2; transform:scale(.98); }
+}
+
+.navbar{
+  position:fixed;
+  width:100%;
+  top:0;
+  left:0;
+  z-index:5000;
+  transition:var(--transition);
+  backdrop-filter:blur(22px);
+  background:rgba(8,27,58,.35);
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+.navbar.scrolled{
+  background:rgba(6,17,37,.75);
+  border-bottom-color:rgba(200,163,77,.25);
+}
+
+.navbar .container{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  height:90px;
+}
+
+.logo{ display:flex; align-items:center; gap:12px; }
+.logo img{ height:56px; }
+.logo-fallback{
+  font-family:Montserrat;
+  font-weight:700;
+  letter-spacing:.12em;
+  font-size:18px;
+  color:var(--gold-light);
+}
+
+nav{ display:flex; gap:48px; }
+
+nav a{
+  font-size:15px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  position:relative;
+  padding-bottom:6px;
+}
+
+nav a::after{
+  content:"";
+  position:absolute;
+  bottom:-8px;
+  left:0;
+  width:0;
+  height:2px;
+  background:var(--gold);
+  transition:var(--transition);
+}
+
+nav a:hover::after,
+nav a.active::after{ width:100%; }
+
+nav a.active{ color:var(--gold); }
+
+.header-actions{ display:flex; align-items:center; gap:20px; }
+
+.btn-header{
+  padding:10px 28px;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  border-radius:999px;
+  font-weight:600;
+  color:#081B3A;
+  box-shadow:0 15px 50px rgba(200,163,77,.35);
+  transition:var(--transition);
+  white-space:nowrap;
+}
+
+.btn-header:hover{ transform:translateY(-4px); }
+
+/*=========================================
+MENU MOBILE (hambúrguer + drawer)
+=========================================*/
+.nav-toggle{
+  display:none;
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  position:relative;
+  flex-shrink:0;
+  cursor:pointer;
+}
+.nav-toggle span{
+  position:absolute;
+  left:13px;
+  right:13px;
+  height:2px;
+  background:var(--gold-light);
+  border-radius:2px;
+  transition:var(--transition);
+}
+.nav-toggle span:nth-child(1){ top:17px; }
+.nav-toggle span:nth-child(2){ top:23px; }
+.nav-toggle span:nth-child(3){ top:29px; }
+.nav-toggle.active span:nth-child(1){ top:23px; transform:rotate(45deg); }
+.nav-toggle.active span:nth-child(2){ opacity:0; }
+.nav-toggle.active span:nth-child(3){ top:23px; transform:rotate(-45deg); }
+
+.nav-drawer{
+  position:fixed;
+  inset:0;
+  z-index:6500;
+  background:rgba(4,9,18,.92);
+  backdrop-filter:blur(26px);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:38px;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .5s ease;
+}
+.nav-drawer.open{ opacity:1; pointer-events:auto; }
+.nav-drawer a{
+  font-family:Montserrat;
+  font-size:clamp(28px,7vw,40px);
+  font-weight:600;
+  letter-spacing:.02em;
+  opacity:0;
+  transform:translateY(24px);
+}
+.nav-drawer.open a{ animation:drawerIn .6s cubic-bezier(.22,.61,.36,1) forwards; }
+.nav-drawer.open a:nth-child(1){ animation-delay:.05s; }
+.nav-drawer.open a:nth-child(2){ animation-delay:.11s; }
+.nav-drawer.open a:nth-child(3){ animation-delay:.17s; }
+.nav-drawer.open a:nth-child(4){ animation-delay:.23s; }
+.nav-drawer.open a:nth-child(5){ animation-delay:.29s; }
+.nav-drawer.open .btn-gold{ animation-delay:.35s; }
+@keyframes drawerIn{ to{ opacity:1; transform:none; } }
+
+/*=========================================
+HERO
+=========================================*/
+
+.hero{
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  position:relative;
+  padding-top:90px;
+}
+
+.hero::before{
+  content:"";
+  position:absolute;
+  width:900px;
+  height:900px;
+  right:-250px;
+  top:-300px;
+  border-radius:50%;
+  background:radial-gradient(circle,var(--gold),transparent 70%);
+  opacity:.08;
+  filter:blur(120px);
+  pointer-events:none;
+}
+
+.hero::after{
+  content:"";
+  position:absolute;
+  width:700px;
+  height:700px;
+  left:-200px;
+  bottom:-300px;
+  border-radius:50%;
+  background:#123C7B;
+  opacity:.22;
+  filter:blur(140px);
+  pointer-events:none;
+}
+
+.hero-glow{
+  position:absolute;
+  width:600px;
+  height:600px;
+  right:-150px;
+  top:10%;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(200,163,77,.35),transparent 65%);
+  filter:blur(80px);
+  pointer-events:none;
+  z-index:0;
+}
+
+.hero-bg{
+  position:absolute;
+  inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:55px 55px;
+  opacity:.22;
+}
+
+.hero-container{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:90px;
+  align-items:center;
+  position:relative;
+  z-index:2;
+}
+
+.hero-sub{
+  display:inline-flex;
+  padding:8px 16px;
+  border-radius:999px;
+  background:rgba(200,163,77,.12);
+  border:1px solid rgba(200,163,77,.25);
+  font-size:11px;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:26px;
+  margin-top: 20px;
+}
+
+.hero h1{
+  font-size:clamp(1.8rem,4.2vw,3.6rem);
+  font-family:Montserrat;
+  font-weight:800;
+  line-height:1.08;
+  max-width:620px;
+  overflow:hidden;
+}
+.hero h1 .char{ display:inline-block; will-change:transform,opacity; }
+
+.hero p{
+  margin-top:30px;
+  max-width:560px;
+  font-size:18px;
+  line-height:1.9;
+  color:#D8E0EF;
+}
+
+.hero-buttons{ display:flex; gap:24px; margin-top:50px; flex-wrap:wrap; }
+
+.btn-gold{
+  position:relative;
+  overflow:hidden;
+  padding:18px 38px;
+  border-radius:999px;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  color:#081B3A;
+  font-weight:700;
+  transition:var(--transition);
+  box-shadow:0 25px 80px rgba(200,163,77,.25);
+  display:inline-block;
+}
+
+.btn-gold:hover{ transform:translateY(-6px); box-shadow:0 30px 90px rgba(200,163,77,.4); }
+
+.btn-outline{
+  padding:18px 38px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,.14);
+  backdrop-filter:blur(18px);
+  transition:var(--transition);
+  display:inline-block;
+}
+.btn-outline:hover{ border-color:rgba(200,163,77,.5); background:rgba(200,163,77,.08); }
+
+.ripple{
+  position:absolute;
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  width:10px;
+  height:10px;
+  background:rgba(8,27,58,.35);
+  pointer-events:none;
+  animation:rippleAnim .6s ease-out forwards;
+}
+@keyframes rippleAnim{
+  to{ width:400px; height:400px; opacity:0; }
+}
+
+/*=========================================
+CENAS 3D — moldura + imagem (margens corrigidas)
+=========================================*/
+#scene3D,
+#wireframe,
+#showroom3D{
+  width:100%;
+  aspect-ratio:1;
+  border-radius:32px;
+  background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:var(--shadow);
+  overflow:hidden;
+  position:relative;
+  padding:14px;
+}
+
+#scene3D::before{
+  content:"";
+  position:absolute;
+  width:140%;
+  height:140%;
+  left:-20%;
+  top:-20%;
+  background:radial-gradient(circle,rgba(200,163,77,.25),transparent 50%);
+  animation:rotateGlow 16s linear infinite;
+}
+
+@keyframes rotateGlow{
+  from{ transform:rotate(0deg); }
+  to{ transform:rotate(360deg); }
+}
+
+.iso-wrap{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  perspective:1400px;
+  border-radius:22px;
+  overflow:hidden;
+}
+.iso-tilt{
+  width:100%;
+  height:100%;
+  transform-style:preserve-3d;
+  will-change:transform;
+  border-radius:22px;
+  overflow:hidden;
+}
+.iso-tilt img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  border-radius:22px;
+  transition:transform 1.4s cubic-bezier(.22,.61,.36,1);
+}
+.iso-svg{ width:100%; height:100%; overflow:visible; }
+.iso-top{ fill:rgba(200,163,77,.16); stroke:var(--gold-light); stroke-width:1.4; vector-effect:non-scaling-stroke; }
+.iso-right{ fill:rgba(200,163,77,.07); stroke:var(--gold); stroke-width:1.1; opacity:.85; vector-effect:non-scaling-stroke; }
+.iso-left{ fill:rgba(255,255,255,.035); stroke:var(--gold); stroke-width:1.1; opacity:.6; vector-effect:non-scaling-stroke; }
+.iso-floor{ fill:none; stroke:rgba(200,163,77,.28); stroke-width:1; stroke-dasharray:5 5; vector-effect:non-scaling-stroke; }
+.iso-pendant-wire{ stroke:rgba(200,163,77,.45); stroke-width:1; vector-effect:non-scaling-stroke; }
+.iso-pendant-shade{ fill:rgba(5,12,23,.7); stroke:var(--gold); stroke-width:1.1; vector-effect:non-scaling-stroke; }
+.iso-pendant-bulb{ fill:var(--gold-light); opacity:0; }
+.iso-glow{ fill:var(--gold); filter:blur(34px); opacity:0; }
+
+#wireframe .iso-cabinets,
+#wireframe .iso-wallcab,
+#wireframe .iso-island,
+#wireframe .iso-counters,
+#wireframe .iso-pendants{ opacity:.05; }
+
+#scene3D .iso-pendant-bulb,
+#showroom3D .iso-pendant-bulb,
+.laptop-screen-inner .iso-pendant-bulb{ opacity:1; }
+#scene3D .iso-glow,
+#showroom3D .iso-glow,
+.laptop-screen-inner .iso-glow{ opacity:.5; }
+
+#wireframe::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(90deg,transparent,rgba(200,163,77,.18),transparent);
+  transform:translateX(-100%);
+  animation:scan 5s linear infinite;
+  z-index:2;
+  pointer-events:none;
+}
+
+@keyframes scan{ to{ transform:translateX(100%); } }
+
+.hero-blueprint{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  opacity:.16;
+  pointer-events:none;
+}
+.hero-orbit{
+  position:absolute;
+  border:1px solid rgba(200,163,77,.18);
+  border-radius:50%;
+  pointer-events:none;
+  z-index:0;
+}
+.hero-orbit.o1{ width:520px; height:520px; right:-60px; top:6%; }
+.hero-orbit.o2{ width:340px; height:340px; right:120px; top:38%; border-color:rgba(200,163,77,.28); }
+
+.scroll-indicator{
+  position:absolute;
+  bottom:40px;
+  left:50%;
+  transform:translateX(-50%);
+  width:26px;
+  height:44px;
+  border:2px solid rgba(255,255,255,.3);
+  border-radius:999px;
+  z-index:2;
+  cursor:pointer;
+}
+.scroll-indicator span{
+  position:absolute;
+  top:8px;
+  left:50%;
+  width:4px;
+  height:8px;
+  background:var(--gold);
+  border-radius:999px;
+  transform:translateX(-50%);
+  animation:scrollDot 1.8s ease-in-out infinite;
+}
+@keyframes scrollDot{
+  0%{ opacity:1; top:8px; }
+  70%{ opacity:0; top:24px; }
+  100%{ opacity:0; top:8px; }
+}
+
+/*=========================================
+STORY / STEPS
+=========================================*/
+
+.story{ position:relative; min-height:250vh; }
+
+.sticky{
+  position:sticky;
+  top:0;
+  height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  align-items:center;
+  gap:120px;
+}
+
+.story-3d{ display:flex; justify-content:center; align-items:center; }
+
+.story-content{ display:flex; flex-direction:column; gap:90px; }
+
+.step{ opacity:.18; transform:translateY(40px); transition:.6s; }
+.step.active{ opacity:1; transform:none; }
+.step span{ color:var(--gold); font-size:14px; letter-spacing:.2em; }
+.step h2{ margin:15px 0; font-size:3rem; }
+.step p{ color:#CBD5E3; line-height:2; }
+
+.quem-somos{ text-align:center; }
+.quem-somos .container{ max-width:820px; }
+.quem-somos span{ color:var(--gold); letter-spacing:.2em; font-size:13px; }
+.quem-somos h2{ font-size:2.6rem; margin:15px 0 30px; font-family:Montserrat; }
+.quem-somos p{ color:#D5DCEA; line-height:2; margin-bottom:22px; font-size:1.05rem; }
+.quem-somos p:last-child{ margin-bottom:0; }
+
+.gallery-item.why-us{
+  background:linear-gradient(155deg,#11284c,#081B3A);
+  cursor:default;
+  padding:34px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.gallery-item.why-us::after{ content:none; }
+.gallery-item.why-us:hover{ transform:none; box-shadow:none; }
+.why-us-inner h3{
+  font-family:Montserrat;
+  font-size:1.4rem;
+  margin-bottom:20px;
+  color:var(--white);
+}
+.why-list{ display:flex; flex-direction:column; gap:14px; }
+.why-list li{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  color:#CBD5E3;
+  font-size:.95rem;
+  line-height:1.6;
+}
+.why-list .check{
+  flex-shrink:0;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  color:#081B3A;
+  font-weight:800;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:13px;
+  margin-top:2px;
+}
+
+.transition{ position:relative; overflow:hidden; text-align:center; }
+.transition::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle,rgba(200,163,77,.10),transparent 70%);
+}
+.transition h2{ font-size:4rem; max-width:900px; margin:auto; }
+.transition span{ color:var(--gold); letter-spacing:.25em; }
+.transition p{ max-width:700px; margin:35px auto; color:#D5DCEA; line-height:2; }
+
+.numbers .container{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:40px;
+}
+
+.number{
+  padding:45px;
+  text-align:center;
+  border-radius:26px;
+  background:rgba(255,255,255,.03);
+  border:1px solid rgba(255,255,255,.06);
+  transition:var(--transition);
+}
+.number:hover{ transform:translateY(-12px); border-color:rgba(200,163,77,.45); box-shadow:0 30px 70px rgba(0,0,0,.35); }
+.number h3{ font-size:3.5rem; color:var(--gold); }
+.number p{ margin-top:12px; color:#CBD5E3; }
+
+/*=========================================
+PROCESSO CRIATIVO
+=========================================*/
+
+.section-title{ max-width:640px; margin-bottom:20px; }
+.section-title span{ color:var(--gold); letter-spacing:.2em; font-size:13px; }
+.section-title h2{ font-size:3rem; margin:15px 0; font-family:Montserrat; }
+.section-title p{ color:#CBD5E3; line-height:1.9; }
+
+.creative-process{ position:relative; }
+
+.timeline{ display:flex; flex-direction:column; gap:60px; margin-top:80px; }
+.timeline-item{ display:flex; gap:40px; align-items:flex-start; }
+
+.timeline-number{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  color:#081B3A;
+  font-size:24px;
+  font-weight:700;
+  flex-shrink:0;
+}
+
+.timeline-content{
+  padding:30px;
+  border-radius:24px;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  width:100%;
+  transition:var(--transition);
+}
+.timeline-content:hover{ transform:translateX(15px); border-color:rgba(200,163,77,.45); }
+.timeline-content h3{ font-size:2rem; margin-bottom:12px; }
+.timeline-content p{ color:#CBD5E3; line-height:2; }
+
+.showroom{ position:relative; }
+.showroom-grid{ display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+.showroom-left span{ color:var(--gold); letter-spacing:.2em; font-size:13px; }
+.showroom-left h2{ font-size:3rem; margin:15px 0; font-family:Montserrat; }
+.showroom-left p{ color:#CBD5E3; line-height:1.9; margin-bottom:30px; max-width:520px; }
+.showroom-right{ display:flex; justify-content:center; }
+
+.materials-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:28px; margin-top:70px; }
+.materials article{
+  background:rgba(255,255,255,.03);
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.08);
+  overflow:hidden;
+  transition:var(--transition);
+}
+.materials article:hover{ transform:translateY(-12px); border-color:rgba(200,163,77,.4); }
+.material-image{
+  height:200px;
+  background:linear-gradient(135deg,#183965,#0A182C);
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.material-image::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(120deg,transparent 30%,rgba(200,163,77,.16) 50%,transparent 70%);
+  transform:translateX(-120%);
+  transition:transform 1s ease;
+}
+.materials article:hover .material-image::before{ transform:translateX(120%); }
+.material-image svg{ width:52px; height:52px; stroke:var(--gold); opacity:.85; position:relative; z-index:1; }
+.materials h3{ padding:25px 25px 10px; }
+.materials p{ padding:0 25px 30px; color:#CBD5E3; }
+
+/*=========================================
+GALERIA
+=========================================*/
+.gallery-grid{ display:grid; grid-template-columns:repeat(12,1fr); gap:18px; }
+.gallery-item{
+  min-height:300px;
+  border-radius:24px;
+  overflow:hidden;
+  background:linear-gradient(135deg,#14345E,#081B3A);
+  transition:transform var(--transition),box-shadow var(--transition);
+  position:relative;
+  cursor:pointer;
+}
+.gallery-item:hover{ transform:scale(1.02); box-shadow:0 30px 80px rgba(0,0,0,.45); }
+.gallery-item.large{ grid-column:span 8; min-height:550px; }
+.gallery-item.tall{ grid-column:span 4; min-height:550px; }
+.gallery-item.wide{ grid-column:span 8; }
+.gallery-item img{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  transition:transform 1.2s cubic-bezier(.22,.61,.36,1);
+}
+.gallery-item:hover img{ transform:scale(1.08); }
+.gallery-item::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(transparent 40%,rgba(0,0,0,.65));
+  z-index:1;
+}
+.gallery-caption{
+  position:absolute;
+  left:26px;
+  bottom:22px;
+  z-index:2;
+  font-family:Montserrat;
+  font-weight:600;
+  font-size:19px;
+  opacity:0;
+  transform:translateY(14px);
+  transition:var(--transition);
+}
+.gallery-item:hover .gallery-caption{ opacity:1; transform:none; }
+.gallery-zoom{
+  position:absolute;
+  top:20px;
+  right:20px;
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  background:rgba(5,12,23,.55);
+  border:1px solid rgba(255,255,255,.18);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:2;
+  opacity:0;
+  transform:scale(.7);
+  transition:var(--transition);
+}
+.gallery-item:hover .gallery-zoom{ opacity:1; transform:none; }
+.gallery-zoom svg{ width:16px; height:16px; stroke:var(--gold-light); }
+
+.cta{ text-align:center; position:relative; overflow:hidden; }
+.cta-overlay{ position:absolute; inset:0; background:radial-gradient(circle,rgba(200,163,77,.15),transparent 70%); }
+.cta span{ color:var(--gold); letter-spacing:.25em; font-size:13px; }
+.cta h2{ font-size:4rem; margin:20px 0; font-family:Montserrat; }
+.cta p{ max-width:700px; margin:auto; line-height:2; color:#D5DCEA; }
+.cta-buttons{ margin-top:45px; display:flex; justify-content:center; gap:24px; flex-wrap:wrap; }
+
+/*=========================================
+FOOTER
+=========================================*/
+
+footer{ padding:100px 0 50px; border-top:1px solid rgba(255,255,255,.06); }
+.footer-grid{
+  display:grid;
+  grid-template-columns:1.4fr 1fr 1fr 1fr;
+  gap:60px;
+}
+.footer-logo{ height:40px; margin-bottom:18px; }
+footer h4{ color:var(--gold); font-size:14px; letter-spacing:.1em; text-transform:uppercase; margin-bottom:16px; }
+footer p{ color:#B8C2D6; line-height:1.9; }
+footer a:hover{ color:var(--gold-light); }
+
+/*=========================================
+EFEITOS GLOBAIS (spotlight, progresso, partículas)
+=========================================*/
+
+.spotlight{
+  position:fixed;
+  top:0;
+  left:0;
+  width:420px;
+  height:420px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(200,163,77,.06),transparent 70%);
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  z-index:1;
+}
+
+.scroll-progress{
+  position:fixed;
+  top:0;
+  left:0;
+  height:3px;
+  width:0%;
+  background:linear-gradient(90deg,var(--gold-light),var(--gold));
+  z-index:6000;
+}
+
+.particles{
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:0;
+  overflow:hidden;
+}
+.particles span{
+  position:absolute;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:rgba(200,163,77,.5);
+  animation:floatParticle 9s ease-in-out infinite;
+}
+@keyframes floatParticle{
+  0%,100%{ transform:translateY(0); opacity:.25; }
+  50%{ transform:translateY(-30px); opacity:.7; }
+}
+
+/*=========================================
+ANTES E DEPOIS
+=========================================*/
+.compare{
+  --reveal:50%;
+  position:relative;
+  width:100%;
+  max-width:920px;
+  margin:70px auto 0;
+  aspect-ratio:16/10;
+  border-radius:28px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow);
+  background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.01));
+  padding:10px;
+}
+.compare-layer{ position:absolute; inset:10px; display:flex; align-items:center; justify-content:center; border-radius:20px; overflow:hidden; }
+.compare-before{ filter:grayscale(1) brightness(.5) contrast(.95); }
+.compare-before .iso-cabinets, .compare-before .iso-wallcab, .compare-before .iso-island, .compare-before .iso-counters, .compare-before .iso-pendants{ opacity:.06; }
+.compare-after{ clip-path:polygon(var(--reveal) 0,100% 0,100% 100%,var(--reveal) 100%); }
+.compare-label{
+  position:absolute; top:22px; font-size:11px; letter-spacing:.18em; text-transform:uppercase;
+  padding:9px 18px; border-radius:999px; background:rgba(5,12,23,.65); border:1px solid var(--border); z-index:3;
+}
+.compare-label.before{ left:22px; }
+.compare-label.after{ right:22px; color:var(--gold); }
+.compare-handle-line{
+  position:absolute; top:0; bottom:0; left:var(--reveal); width:2px;
+  background:var(--gold); pointer-events:none; box-shadow:0 0 24px rgba(200,163,77,.65); z-index:3;
+}
+.compare-handle{
+  position:absolute; top:50%; left:var(--reveal); width:54px; height:54px; border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold)); transform:translate(-50%,-50%);
+  display:flex; align-items:center; justify-content:center; color:#081B3A; font-size:20px; font-weight:700;
+  pointer-events:none; box-shadow:0 10px 34px rgba(200,163,77,.45); z-index:3;
+}
+.compare-range{
+  position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:ew-resize; z-index:4;
+  -webkit-appearance:none; appearance:none; background:transparent;
+}
+.compare-range::-webkit-slider-thumb{ -webkit-appearance:none; width:54px; height:54px; }
+.compare-range::-moz-range-thumb{ width:54px; height:54px; opacity:0; border:none; }
+
+/*=========================================
+NOTEBOOK 3D
+=========================================*/
+.laptop-stage{ perspective:1800px; width:100%; max-width:640px; margin:80px auto 0; }
+.laptop{ position:relative; width:100%; aspect-ratio:16/10.6; transform-style:preserve-3d; }
+.laptop-base{
+  position:absolute; inset:0; border-radius:14px;
+  background:linear-gradient(160deg,#132a4d,#081428);
+  border:1px solid rgba(255,255,255,.08); box-shadow:var(--shadow);
+}
+.laptop-base::before{
+  content:""; position:absolute; top:14px; left:14px; right:14px; bottom:14px;
+  border-radius:8px; background:rgba(255,255,255,.02); border:1px solid rgba(255,255,255,.05);
+}
+.laptop-base::after{
+  content:""; position:absolute; left:50%; bottom:8px; width:70px; height:6px; border-radius:4px;
+  background:rgba(200,163,77,.25); transform:translateX(-50%);
+}
+.laptop-screen{
+  position:absolute; left:0; right:0; bottom:100%; height:100%;
+  transform-origin:bottom center; transform:rotateX(-96deg);
+  border-radius:14px 14px 6px 6px;
+  background:linear-gradient(160deg,#0c1f3d,#050c17);
+  border:1px solid rgba(255,255,255,.08); box-shadow:var(--shadow);
+  overflow:hidden; will-change:transform;
+}
+.laptop-screen-inner{
+  position:absolute; inset:10px; border-radius:8px; overflow:hidden;
+  background:radial-gradient(circle at 30% 20%,rgba(200,163,77,.14),transparent 60%),#04070d;
+  display:flex; align-items:center; justify-content:center;
+}
+.laptop-screen-inner .iso-tilt{ width:100%; height:100%; border-radius:8px; }
+.laptop-screen-inner .iso-tilt img{ border-radius:8px; }
+.laptop-caption{ text-align:center; margin-top:34px; color:#CBD5E3; }
+.laptop-caption strong{ color:var(--gold); }
+
+/*=========================================
+LIGHTBOX GALERIA
+=========================================*/
+.lightbox{
+  position:fixed; inset:0; z-index:9000; display:none; align-items:center; justify-content:center;
+  background:rgba(3,6,10,.9); backdrop-filter:blur(12px);
+}
+.lightbox.active{ display:flex; }
+.lightbox-inner{
+  border-radius:24px; overflow:hidden; box-shadow:var(--shadow);
+  background:linear-gradient(135deg,#14345E,#081B3A); position:fixed;
+  display:flex; align-items:flex-end; padding:30px;
+}
+.lightbox-inner img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.lightbox-inner::after{ content:""; position:absolute; inset:0; background:linear-gradient(transparent,rgba(0,0,0,.6)); }
+.lightbox-caption{ position:relative; z-index:2; font-family:Montserrat; font-size:22px; }
+.lightbox-close{
+  position:fixed; top:26px; right:26px; width:44px; height:44px; border-radius:50%;
+  border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
+  cursor:pointer; background:rgba(255,255,255,.06); color:white; font-size:20px; z-index:9001;
+  opacity:0; pointer-events:none; transition:opacity .3s;
+}
+.lightbox.active .lightbox-close{ opacity:1; pointer-events:auto; }
+
+/*=========================================
+BOTÃO WHATSAPP FLUTUANTE
+=========================================*/
+.whatsapp-float{
+  position:fixed;
+  right:26px;
+  bottom:26px;
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#2fd06b,#1fa855);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:4500;
+  box-shadow:0 18px 45px rgba(31,168,85,.45);
+  transition:var(--transition);
+}
+.whatsapp-float:hover{ transform:translateY(-5px) scale(1.05); }
+.whatsapp-float svg{ width:28px; height:28px; fill:white; }
+
+/*=========================================
+RESPONSIVO
+=========================================*/
+
+@media (max-width:1100px){
+  .hero-container,
+  .sticky,
+  .showroom-grid{ grid-template-columns:1fr; gap:60px; }
+  .materials-grid{ grid-template-columns:repeat(2,1fr); }
+  .numbers .container{ grid-template-columns:repeat(2,1fr); }
+  .footer-grid{ grid-template-columns:1fr 1fr; }
+  nav{ display:none; }
+  .nav-toggle{ display:flex; }
+  .sticky{ height:auto; position:relative; top:auto; padding:60px 0; }
+  .story{ min-height:auto; }
+  .story-3d{ order:-1; }
+  #wireframe{ max-width:420px; margin:0 auto; }
+}
+
+@media (max-width:640px){
+  section{ padding:80px 0; }
+  .navbar .container{ height:76px; }
+  .hero{ padding-top:76px; min-height:auto; padding-bottom:90px; }
+  .hero-buttons{ flex-direction:column; }
+  .hero-buttons a{ text-align:center; }
+  .gallery-item.large,
+  .gallery-item.tall,
+  .gallery-item.wide{ grid-column:span 12; min-height:280px; }
+  .gallery-grid{ gap:14px; }
+  .materials-grid{ grid-template-columns:1fr; }
+  .footer-grid{ grid-template-columns:1fr; gap:40px; }
+  .numbers .container{ grid-template-columns:1fr 1fr; gap:18px; }
+  .number{ padding:28px 18px; }
+  .number h3{ font-size:2.4rem; }
+  .transition h2{ font-size:2.4rem; }
+  .cta h2{ font-size:2.6rem; }
+  .step h2{ font-size:2.1rem; }
+  .timeline-item{ gap:22px; }
+  .timeline-number{ width:56px; height:56px; font-size:18px; }
+  .timeline-content{ padding:22px; }
+  .timeline-content h3{ font-size:1.5rem; }
+  .section-title h2{ font-size:2.2rem; }
+  .compare{ margin-top:40px; }
+  .compare-handle{ width:44px; height:44px; font-size:16px; }
+  .whatsapp-float{ right:16px; bottom:16px; width:54px; height:54px; }
+  .cta-buttons{ flex-direction:column; align-items:center; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div class="loader-logo">FLASH STOCK</div>
+</div>
+
+<div class="cursor"></div>
+
+<header class="navbar">
+  <div class="container">
+    <a href="#hero" class="logo">
+      <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="Flash Stock" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback" style="display:none;">FLASH STOCK</span>
+    </a>
+    <nav>
+      <a href="{{ url_for('index') }}" class="active">Início</a>
+      <a href="{{ url_for('catalogo') }}">Catálogo</a>
+      <a href="#showroom">Ambientes</a>
+      <a href="{{ url_for('sobre') }}">Sobre</a>
+      <a href="#cta">Contato</a>
+    </nav>
+    <div class="header-actions">
+      <a href="#cta" class="btn-header">Solicitar Projeto</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-drawer" id="navDrawer">
+  <a href="{{ url_for('index') }}">Início</a>
+  <a href="{{ url_for('catalogo') }}">Catálogo</a>
+  <a href="#showroom">Ambientes</a>
+  <a href="{{ url_for('sobre') }}">Sobre</a>
+  <a href="#cta">Contato</a>
+  <a href="#cta" class="btn-gold">Solicitar Projeto</a>
+</nav>
+
+<main>
+
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <svg class="hero-blueprint" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <line x1="0" y1="120" x2="1200" y2="480" stroke="#C8A34D" stroke-width="1"/>
+    <line x1="0" y1="640" x2="1200" y2="220" stroke="#C8A34D" stroke-width="1"/>
+    <circle cx="980" cy="180" r="120" fill="none" stroke="#C8A34D" stroke-width="1"/>
+    <circle cx="980" cy="180" r="180" fill="none" stroke="#C8A34D" stroke-width="1"/>
+  </svg>
+  <div class="hero-orbit o1"></div>
+  <div class="hero-orbit o2"></div>
+  <div class="hero-glow"></div>
+
+  <div class="container hero-container">
+    <div class="hero-left">
+      <span class="hero-sub">MÓVEIS PLANEJADOS • DESIGN • ARQUITETURA</span>
+
+      <h1>Toda grande ideia<br>começa com um<br>traço.</h1>
+
+      <p>
+        Criamos ambientes personalizados que unem design,
+        funcionalidade e precisão para transformar espaços
+        em experiências únicas.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="#cta" class="btn-gold">Solicitar Projeto 3D</a>
+        <a href="#galeria" class="btn-outline">Conheça nossos projetos</a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div id="scene3D"><div class="iso-wrap"><div class="iso-tilt"><img src="https://i.postimg.cc/xTWrRs45/Chat-GPT-Image-13-de-jul-de-2026-03-02-55.png" alt="Cozinha planejada Flash Stock em render 3D" loading="eager" decoding="async"></div></div></div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator" role="button" aria-label="Rolar para baixo"><span></span></div>
+</section>
+
+<section class="story">
+  <div class="sticky">
+    <div class="story-3d">
+      <div id="wireframe"><div class="iso-wrap"><div class="iso-tilt"><svg class="iso-svg" viewBox="90 240 470 430" xmlns="http://www.w3.org/2000/svg"><path class="iso-floor" d="M 300.0,426.1 L 502.6,543.1 L 345.0,634.1 L 142.4,517.1 Z"/><g class="iso-grp iso-cabinets"><path class="iso-top" d="M 300.0,373.0 L 331.5,391.2 L 196.4,469.2 L 164.9,451.0 Z"/><path class="iso-right" d="M 300.0,430.2 L 331.5,448.4 L 331.5,391.2 L 300.0,373.0 Z"/><path class="iso-left" d="M 300.0,430.2 L 164.9,508.2 L 164.9,451.0 L 300.0,373.0 Z"/><path class="iso-top" d="M 294.6,376.1 L 438.7,459.3 L 407.2,477.5 L 263.1,394.3 Z"/><path class="iso-right" d="M 294.6,433.3 L 438.7,516.5 L 438.7,459.3 L 294.6,376.1 Z"/><path class="iso-left" d="M 294.6,433.3 L 263.1,451.5 L 263.1,394.3 L 294.6,376.1 Z"/></g><g class="iso-grp iso-wallcab"><path class="iso-top" d="M 294.8,303.6 L 420.9,376.4 L 398.4,389.4 L 272.3,316.6 Z"/><path class="iso-right" d="M 294.8,340.0 L 420.9,412.8 L 420.9,376.4 L 294.8,303.6 Z"/><path class="iso-left" d="M 294.8,340.0 L 272.3,353.0 L 272.3,316.6 L 294.8,303.6 Z"/></g><g class="iso-grp iso-island"><path class="iso-top" d="M 301.6,380.5 L 378.1,424.7 L 337.6,448.1 L 261.0,403.9 Z"/><path class="iso-right" d="M 301.6,432.5 L 378.1,476.7 L 378.1,424.7 L 301.6,380.5 Z"/><path class="iso-left" d="M 301.6,432.5 L 261.0,455.9 L 261.0,403.9 L 301.6,380.5 Z"/><path class="iso-top" d="M 301.6,375.6 L 387.1,425.0 L 337.6,453.6 L 252.0,404.2 Z"/><path class="iso-right" d="M 301.6,380.3 L 387.1,429.7 L 387.1,425.0 L 301.6,375.6 Z"/><path class="iso-left" d="M 301.6,380.3 L 252.0,408.9 L 252.0,404.2 L 301.6,375.6 Z"/></g><g class="iso-grp iso-counters"><path class="iso-top" d="M 294.6,371.7 L 447.7,460.1 L 409.5,482.2 L 256.4,393.8 Z"/><path class="iso-right" d="M 294.6,375.9 L 447.7,464.3 L 447.7,460.1 L 294.6,371.7 Z"/><path class="iso-left" d="M 294.6,375.9 L 256.4,398.0 L 256.4,393.8 L 294.6,371.7 Z"/><path class="iso-top" d="M 300.0,368.6 L 338.3,390.7 L 194.2,473.9 L 155.9,451.8 Z"/><path class="iso-right" d="M 300.0,372.8 L 338.3,394.9 L 338.3,390.7 L 300.0,368.6 Z"/><path class="iso-left" d="M 300.0,372.8 L 155.9,456.0 L 155.9,451.8 L 300.0,368.6 Z"/></g><g class="iso-grp iso-pendants"><line class="iso-pendant-wire" x1="301.6" y1="266.8" x2="301.6" y2="355.2"/><ellipse class="iso-pendant-shade" cx="301.6" cy="355.2" rx="14" ry="6"/><circle class="iso-pendant-bulb" cx="301.6" cy="360.2" r="4"/><line class="iso-pendant-wire" x1="302.7" y1="267.4" x2="302.7" y2="355.8"/><ellipse class="iso-pendant-shade" cx="302.7" cy="355.8" rx="14" ry="6"/><circle class="iso-pendant-bulb" cx="302.7" cy="360.8" r="4"/></g><ellipse class="iso-glow" cx="302.0" cy="433.6" rx="150" ry="70"/></svg></div></div></div>
+    </div>
+
+    <div class="story-content">
+      <div class="step active">
+        <span>01</span>
+        <h2>Toda criação começa com uma ideia.</h2>
+        <p>
+          Antes de existir um móvel existe um conceito.
+          Cada projeto nasce da compreensão do seu ambiente,
+          da sua rotina e das possibilidades do espaço.
+        </p>
+      </div>
+
+      <div class="step">
+        <span>02</span>
+        <h2>O desenho ganha forma.</h2>
+        <p>
+          Transformamos referências em projetos técnicos,
+          com proporções, materiais e soluções pensadas
+          exclusivamente para você.
+        </p>
+      </div>
+
+      <div class="step">
+        <span>03</span>
+        <h2>Precisão em cada detalhe.</h2>
+        <p>
+          Cada medida é calculada para aproveitar
+          cada centímetro do ambiente sem abrir mão
+          da elegância e da funcionalidade.
+        </p>
+      </div>
+
+      <div class="step">
+        <span>04</span>
+        <h2>Do projeto ao ambiente real.</h2>
+        <p>
+          Quando tudo está aprovado, o conceito ganha vida
+          através da fabricação, acabamento e instalação profissional.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="transition">
+  <div class="container">
+    <span>FLASH STOCK</span>
+    <h2>Projetamos ambientes. Criamos experiências.</h2>
+    <p>
+      Cada móvel é resultado da combinação entre criatividade,
+      engenharia, materiais de alta qualidade e execução precisa.
+    </p>
+  </div>
+</section>
+
+<section class="quem-somos" id="quemsomos">
+  <div class="container">
+    <span>QUEM SOMOS</span>
+    <h2>Feita para durar, pensada para você.</h2>
+    <p>Flash Stock é uma empresa jovem, fundada com o propósito de inovar no mercado moveleiro. Contamos com uma equipe altamente capacitada, com mais de 12 anos de experiência no setor, o que nos permite unir dinamismo com excelência técnica.</p>
+    <p>Nossa missão é oferecer matéria-prima de alta qualidade, com agilidade na entrega e preços competitivos, sempre comprometidos em superar as expectativas dos nossos clientes.</p>
+    <p>Na Flash Stock, transformamos projetos em realidade com confiança, eficiência e qualidade.</p>
+  </div>
+</section>
+
+<section class="before-after">
+  <div class="container">
+    <div class="section-title" style="margin:0 auto 0;text-align:center;max-width:640px;">
+      <span>ANTES E DEPOIS</span>
+      <h2>Arraste e veja a transformação.</h2>
+      <p>Do ambiente vazio ao projeto assinado pela Flash Stock — tudo pensado em cada centímetro.</p>
+    </div>
+
+    <div class="compare" id="compareKitchen">
+      <div class="compare-layer compare-before" id="compareBeforeLayer"><div class="iso-wrap"><div class="iso-tilt"><svg class="iso-svg" viewBox="90 240 470 430" xmlns="http://www.w3.org/2000/svg"><path class="iso-floor" d="M 300.0,426.1 L 502.6,543.1 L 345.0,634.1 L 142.4,517.1 Z"/><g class="iso-grp iso-cabinets"><path class="iso-top" d="M 300.0,373.0 L 331.5,391.2 L 196.4,469.2 L 164.9,451.0 Z"/><path class="iso-right" d="M 300.0,430.2 L 331.5,448.4 L 331.5,391.2 L 300.0,373.0 Z"/><path class="iso-left" d="M 300.0,430.2 L 164.9,508.2 L 164.9,451.0 L 300.0,373.0 Z"/><path class="iso-top" d="M 294.6,376.1 L 438.7,459.3 L 407.2,477.5 L 263.1,394.3 Z"/><path class="iso-right" d="M 294.6,433.3 L 438.7,516.5 L 438.7,459.3 L 294.6,376.1 Z"/><path class="iso-left" d="M 294.6,433.3 L 263.1,451.5 L 263.1,394.3 L 294.6,376.1 Z"/></g><g class="iso-grp iso-wallcab"><path class="iso-top" d="M 294.8,303.6 L 420.9,376.4 L 398.4,389.4 L 272.3,316.6 Z"/><path class="iso-right" d="M 294.8,340.0 L 420.9,412.8 L 420.9,376.4 L 294.8,303.6 Z"/><path class="iso-left" d="M 294.8,340.0 L 272.3,353.0 L 272.3,316.6 L 294.8,303.6 Z"/></g><g class="iso-grp iso-island"><path class="iso-top" d="M 301.6,380.5 L 378.1,424.7 L 337.6,448.1 L 261.0,403.9 Z"/><path class="iso-right" d="M 301.6,432.5 L 378.1,476.7 L 378.1,424.7 L 301.6,380.5 Z"/><path class="iso-left" d="M 301.6,432.5 L 261.0,455.9 L 261.0,403.9 L 301.6,380.5 Z"/><path class="iso-top" d="M 301.6,375.6 L 387.1,425.0 L 337.6,453.6 L 252.0,404.2 Z"/><path class="iso-right" d="M 301.6,380.3 L 387.1,429.7 L 387.1,425.0 L 301.6,375.6 Z"/><path class="iso-left" d="M 301.6,380.3 L 252.0,408.9 L 252.0,404.2 L 301.6,375.6 Z"/></g><g class="iso-grp iso-counters"><path class="iso-top" d="M 294.6,371.7 L 447.7,460.1 L 409.5,482.2 L 256.4,393.8 Z"/><path class="iso-right" d="M 294.6,375.9 L 447.7,464.3 L 447.7,460.1 L 294.6,371.7 Z"/><path class="iso-left" d="M 294.6,375.9 L 256.4,398.0 L 256.4,393.8 L 294.6,371.7 Z"/><path class="iso-top" d="M 300.0,368.6 L 338.3,390.7 L 194.2,473.9 L 155.9,451.8 Z"/><path class="iso-right" d="M 300.0,372.8 L 338.3,394.9 L 338.3,390.7 L 300.0,368.6 Z"/><path class="iso-left" d="M 300.0,372.8 L 155.9,456.0 L 155.9,451.8 L 300.0,368.6 Z"/></g><g class="iso-grp iso-pendants"><line class="iso-pendant-wire" x1="301.6" y1="266.8" x2="301.6" y2="355.2"/><ellipse class="iso-pendant-shade" cx="301.6" cy="355.2" rx="14" ry="6"/><circle class="iso-pendant-bulb" cx="301.6" cy="360.2" r="4"/><line class="iso-pendant-wire" x1="302.7" y1="267.4" x2="302.7" y2="355.8"/><ellipse class="iso-pendant-shade" cx="302.7" cy="355.8" rx="14" ry="6"/><circle class="iso-pendant-bulb" cx="302.7" cy="360.8" r="4"/></g><ellipse class="iso-glow" cx="302.0" cy="433.6" rx="150" ry="70"/></svg></div></div></div>
+      <div class="compare-layer compare-after" id="compareAfterLayer"><div class="iso-wrap"><div class="iso-tilt"><img src="https://i.postimg.cc/c1b6dmVx/d406fe99-ef73-4f1c-bdc8-f64905f09418.png" alt="Cozinha Flash Stock finalizada" loading="lazy" decoding="async"></div></div></div>
+      <div class="compare-handle-line"></div>
+      <div class="compare-handle">↔</div>
+      <span class="compare-label before">Antes</span>
+      <span class="compare-label after">Depois</span>
+      <input type="range" class="compare-range" min="0" max="100" value="50" aria-label="Arraste para comparar antes e depois">
+    </div>
+  </div>
+</section>
+
+<section class="numbers">
+  <div class="container">
+    <div class="number">
+      <h3><span class="num-value">100</span><span class="num-suffix">%</span></h3>
+      <p>Projetos Personalizados</p>
+    </div>
+    <div class="number">
+      <h3><span class="num-value">3</span><span class="num-suffix">D</span></h3>
+      <p>Visualização Antes da Produção</p>
+    </div>
+    <div class="number">
+      <h3><span class="num-value">Premium</span></h3>
+      <p>Materiais Selecionados</p>
+    </div>
+    <div class="number">
+      <h3><span class="num-value">Sob Medida</span></h3>
+      <p>Cada Ambiente é Único</p>
+    </div>
+  </div>
+</section>
+
+<section class="creative-process" id="processo">
+  <div class="container">
+    <div class="section-title">
+      <span>PROCESSO CRIATIVO</span>
+      <h2>Da ideia ao ambiente perfeito.</h2>
+      <p>
+        Cada projeto percorre uma jornada cuidadosamente planejada,
+        garantindo que o resultado final seja exclusivo para cada cliente.
+      </p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-number">01</div>
+        <div class="timeline-content">
+          <h3>Briefing</h3>
+          <p>Entendemos seu espaço, rotina e necessidades para criar uma solução totalmente personalizada.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-number">02</div>
+        <div class="timeline-content">
+          <h3>Conceito</h3>
+          <p>Desenvolvemos referências, estilo e composição do ambiente.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-number">03</div>
+        <div class="timeline-content">
+          <h3>Projeto 3D</h3>
+          <p>Você visualiza exatamente como ficará antes da fabricação.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-number">04</div>
+        <div class="timeline-content">
+          <h3>Produção</h3>
+          <p>Fabricação utilizando materiais de alta qualidade e acabamento premium.</p>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-number">05</div>
+        <div class="timeline-content">
+          <h3>Instalação</h3>
+          <p>Montagem realizada por profissionais especializados.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="laptop-section">
+  <div class="container" style="text-align:center;">
+    <div class="section-title" style="margin:0 auto 0;max-width:640px;">
+      <span>PROJETO 3D</span>
+      <h2>Veja como ficará antes mesmo da fabricação.</h2>
+      <p>Enquanto você rola a página, o notebook abre e revela o projeto do seu ambiente em 3D.</p>
+    </div>
+
+    <div class="laptop-stage">
+      <div class="laptop">
+        <div class="laptop-screen">
+          <div class="laptop-screen-inner" id="laptopScene"><div class="iso-wrap"><div class="iso-tilt"><img src="https://i.postimg.cc/B6TMcbHF/Chat-GPT-Image-13-de-jul-de-2026-01-53-36.png" alt="Projeto de móveis em tela 3D" loading="lazy" decoding="async"></div></div></div>
+        </div>
+        <div class="laptop-base"></div>
+      </div>
+    </div>
+
+    <p class="laptop-caption">Aprovado o projeto, <strong>fabricamos exatamente</strong> o que você viu na tela.</p>
+  </div>
+</section>
+
+<section class="showroom" id="showroom">
+  <div class="container showroom-grid">
+    <div class="showroom-left">
+      <span>SHOWROOM DIGITAL</span>
+      <h2>Explore ambientes em uma nova perspectiva.</h2>
+      <p>
+        Navegue por projetos completos, conheça detalhes,
+        materiais e visualize cada ambiente com riqueza de detalhes.
+      </p>
+      <a href="#cta" class="btn-gold">Explorar Projetos</a>
+    </div>
+
+    <div class="showroom-right">
+      <div id="showroom3D"><div class="iso-wrap"><div class="iso-tilt"><svg class="iso-svg" viewBox="90 240 470 430" xmlns="http://www.w3.org/2000/svg"><path class="iso-floor" d="M 300.0,426.1 L 502.6,543.1 L 345.0,634.1 L 142.4,517.1 Z"/><g class="iso-grp iso-cabinets"><path class="iso-top" d="M 300.0,373.0 L 331.5,391.2 L 196.4,469.2 L 164.9,451.0 Z"/><path class="iso-right" d="M 300.0,430.2 L 331.5,448.4 L 331.5,391.2 L 300.0,373.0 Z"/><path class="iso-left" d="M 300.0,430.2 L 164.9,508.2 L 164.9,451.0 L 300.0,373.0 Z"/><path class="iso-top" d="M 294.6,376.1 L 438.7,459.3 L 407.2,477.5 L 263.1,394.3 Z"/><path class="iso-right" d="M 294.6,433.3 L 438.7,516.5 L 438.7,459.3 L 294.6,376.1 Z"/><path class="iso-left" d="M 294.6,433.3 L 263.1,451.5 L 263.1,394.3 L 294.6,376.1 Z"/></g><g class="iso-grp iso-wallcab"><path class="iso-top" d="M 294.8,303.6 L 420.9,376.4 L 398.4,389.4 L 272.3,316.6 Z"/><path class="iso-right" d="M 294.8,340.0 L 420.9,412.8 L 420.9,376.4 L 294.8,303.6 Z"/><path class="iso-left" d="M 294.8,340.0 L 272.3,353.0 L 272.3,316.6 L 294.8,303.6 Z"/></g><g class="iso-grp iso-island"><path class="iso-top" d="M 301.6,380.5 L 378.1,424.7 L 337.6,448.1 L 261.0,403.9 Z"/><path class="iso-right" d="M 301.6,432.5 L 378.1,476.7 L 378.1,424.7 L 301.6,380.5 Z"/><path class="iso-left" d="M 301.6,432.5 L 261.0,455.9 L 261.0,403.9 L 301.6,380.5 Z"/><path class="iso-top" d="M 301.6,375.6 L 387.1,425.0 L 337.6,453.6 L 252.0,404.2 Z"/><path class="iso-right" d="M 301.6,380.3 L 387.1,429.7 L 387.1,425.0 L 301.6,375.6 Z"/><path class="iso-left" d="M 301.6,380.3 L 252.0,408.9 L 252.0,404.2 L 301.6,375.6 Z"/></g><g class="iso-grp iso-counters"><path class="iso-top" d="M 294.6,371.7 L 447.7,460.1 L 409.5,482.2 L 256.4,393.8 Z"/><path class="iso-right" d="M 294.6,375.9 L 447.7,464.3 L 447.7,460.1 L 294.6,371.7 Z"/><path class="iso-left" d="M 294.6,375.9 L 256.4,398.0 L 256.4,393.8 L 294.6,371.7 Z"/><path class="iso-top" d="M 300.0,368.6 L 338.3,390.7 L 194.2,473.9 L 155.9,451.8 Z"/><path class="iso-right" d="M 300.0,372.8 L 338.3,394.9 L 338.3,390.7 L 300.0,368.6 Z"/><path class="iso-left" d="M 300.0,372.8 L 155.9,456.0 L 155.9,451.8 L 300.0,368.6 Z"/></g><g class="iso-grp iso-pendants"><line class="iso-pendant-wire" x1="301.6" y1="266.8" x2="301.6" y2="355.2"/><ellipse class="iso-pendant-shade" cx="301.6" cy="355.2" rx="14" ry="6"/><circle class="iso-pendant-bulb" cx="301.6" cy="360.2" r="4"/><line class="iso-pendant-wire" x1="302.7" y1="267.4" x2="302.7" y2="355.8"/><ellipse class="iso-pendant-shade" cx="302.7" cy="355.8" rx="14" ry="6"/><circle class="iso-pendant-bulb" cx="302.7" cy="360.8" r="4"/></g><ellipse class="iso-glow" cx="302.0" cy="433.6" rx="150" ry="70"/></svg></div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="materials">
+  <div class="container">
+    <div class="section-title">
+      <span>MATERIAIS</span>
+      <h2>Qualidade em cada detalhe.</h2>
+    </div>
+
+    <div class="materials-grid">
+      <article>
+        <div class="material-image"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <h3>MDF Premium</h3>
+        <p>Alta resistência e acabamento sofisticado.</p>
+      </article>
+
+      <article>
+        <div class="material-image"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20l6-16h6l6 16M6 12h12"/></svg></div>
+        <h3>Madeiras Nobres</h3>
+        <p>Texturas naturais para ambientes elegantes.</p>
+      </article>
+
+      <article>
+        <div class="material-image"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 15l4-4 4 4 4-6 4 4"/></svg></div>
+        <h3>Vidros</h3>
+        <p>Leveza, modernidade e sofisticação.</p>
+      </article>
+
+      <article>
+        <div class="material-image"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg></div>
+        <h3>Ferragens</h3>
+        <p>Sistemas modernos e silenciosos.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="gallery" id="galeria">
+  <div class="container">
+    <div class="section-title">
+      <span>PORTFÓLIO</span>
+      <h2>Ambientes que inspiram.</h2>
+    </div>
+
+    <div class="gallery-grid">
+      <div class="gallery-item large" data-caption="Cozinha Planejada — Alto Padrão">
+        <img src="https://i.postimg.cc/zGq5nHhX/Chat-GPT-Image-13-de-jul-de-2026-01-48-22.png" alt="Cozinha planejada de alto padrão" loading="lazy" decoding="async">
+        <span class="gallery-zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+        <span class="gallery-caption">Cozinha Planejada — Alto Padrão</span>
+      </div>
+
+      <div class="gallery-item tall" data-caption="Dormitório Contemporâneo">
+        <img src="https://i.postimg.cc/1z6TLn9B/81c9ae1a-4b62-40b4-bacd-52cf33bf0800.jpg" alt="Dormitório contemporâneo planejado" loading="lazy" decoding="async">
+        <span class="gallery-zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+        <span class="gallery-caption">Dormitório Contemporâneo</span>
+      </div>
+
+      <div class="gallery-item why-us">
+        <div class="why-us-inner">
+          <h3>Por que comprar com a Flash Stock?</h3>
+          <ul class="why-list">
+            <li><span class="check">✓</span> Móveis 100% sob medida — projetados exatamente para o seu espaço.</li>
+            <li><span class="check">✓</span> Projeto personalizado em 3D — você visualiza tudo antes de fabricar.</li>
+            <li><span class="check">✓</span> Qualidade direto da fábrica — materiais selecionados e acabamento superior.</li>
+            <li><span class="check">✓</span> Atendimento especializado — acompanhamento do início ao fim.</li>
+            <li><span class="check">✓</span> Compromisso com prazo e montagem — seriedade e pós-venda.</li>
+            <li><span class="check">✓</span> Soluções completas — planejados, colchões e estofados.</li>
+            <li><span class="check">✓</span> O melhor custo-benefício de São Paulo.</li>
+            <li><span class="check">✓</span> A entrega mais rápida de São Paulo.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="gallery-item wide" data-caption="Living Integrado com Ilha">
+        <img src="https://i.postimg.cc/4dwZ2fTg/Chat-GPT-Image-13-de-jul-de-2026-02-27-54.png" alt="Living integrado com ilha planejada" loading="lazy" decoding="async">
+        <span class="gallery-zoom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span>
+        <span class="gallery-caption">Living Integrado com Ilha</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta" id="cta">
+  <div class="cta-overlay"></div>
+  <div class="container">
+    <span>FLASH STOCK</span>
+    <h2>O próximo projeto pode ser o seu.</h2>
+    <p>
+      Agende um atendimento e receba um Projeto 3D
+      desenvolvido especialmente para o seu ambiente.
+    </p>
+
+    <div class="cta-buttons">
+      <a href="https://wa.me/5511969183002" target="_blank" rel="noopener" class="btn-gold">Solicitar Projeto</a>
+      <a href="https://wa.me/5511969183002" target="_blank" rel="noopener" class="btn-outline">WhatsApp</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container footer-grid">
+    <div>
+      <img src="{{ url_for('static', filename='assets/logo.png') }}" class="footer-logo" alt="Flash Stock" onerror="this.style.display='none'">
+      <p>Transformando ideias em ambientes exclusivos.</p>
+    </div>
+
+    <div>
+      <h4>Contato</h4>
+      <p><a href="tel:+5511969183002">(11) 96918-3002</a></p>
+      <p><a href="https://instagram.com/flashstockmoveis" target="_blank" rel="noopener">@flashstockmoveis</a></p>
+      <p><a href="mailto:contato@flashstock.com.br">contato@flashstock.com.br</a></p>
+    </div>
+
+    <div>
+      <h4>Endereço</h4>
+      <p>Avenida Paula Ferreira, 2885<br>São Paulo - SP<br>CEP 02915-100</p>
+    </div>
+
+    <div>
+      <h4>Horário</h4>
+      <p>Segunda à Sexta<br>09:00 às 18:00</p>
+      <p style="margin-top:14px;"><a href="{{ url_for('catalogo') }}">Ver Catálogo</a> · <a href="{{ url_for('sobre') }}">Sobre Nós</a></p>
+    </div>
+  </div>
+  <div class="container" style="text-align:center;margin-top:40px;opacity:.5;font-size:12px;">
+    <a href="{{ url_for('login') }}" style="color:#8A93A6;">Área Restrita</a>
+  </div>
+</footer>
+
+<a href="https://wa.me/5511969183002" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.5-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.4.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.2 3.4 5.3 4.7.7.3 1.3.5 1.8.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.3-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.5-1.2l-.3-.2-3.2.8.8-3.1-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
+</a>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-close" id="lightboxClose">✕</div>
+  <div class="lightbox-inner" id="lightboxInner">
+    <span class="lightbox-caption" id="lightboxCaption"></span>
+  </div>
+</div>
+
+<script>
+/*=========================================
+FLASH STOCK — Script único, revisado e otimizado
+=========================================*/
+
+gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
+
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const hasFinePointer = window.matchMedia("(hover:hover) and (pointer:fine)").matches;
+const isMobile = window.matchMedia("(max-width:1100px)").matches;
+
+/*=========================================
+LOADER
+=========================================*/
+window.addEventListener("load", () => {
+  gsap.to("#loader", {
+    opacity: 0,
+    duration: 1,
+    ease: "power3.out",
+    onComplete: () => { document.getElementById("loader").style.display = "none"; }
+  });
+  ScrollTrigger.refresh();
+});
+
+if (document.fonts && document.fonts.ready) {
+  document.fonts.ready.then(() => ScrollTrigger.refresh());
+}
+
+/*=========================================
+LENIS (smooth scroll)
+=========================================*/
+let lenis = null;
+
+if (!reduceMotion) {
+  lenis = new Lenis({
+    duration: 1.15,
+    smoothWheel: true,
+    smoothTouch: false,
+    wheelMultiplier: 1,
+    touchMultiplier: 1,
+    infinite: false
+  });
+
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+
+  lenis.on("scroll", ScrollTrigger.update);
+
+  gsap.ticker.add((time) => { lenis.raf(time * 1000); });
+  gsap.ticker.lagSmoothing(0);
+}
+
+function smoothScrollTo(target) {
+  if (lenis) {
+    lenis.scrollTo(target, { offset: -80 });
+  } else {
+    target.scrollIntoView({ behavior: "smooth" });
+  }
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(link => {
+  link.addEventListener("click", (e) => {
+    const id = link.getAttribute("href");
+    if (id.length < 2) return;
+    const target = document.querySelector(id);
+    if (!target) return;
+    e.preventDefault();
+    closeDrawer();
+    smoothScrollTo(target);
+  });
+});
+
+document.querySelector(".scroll-indicator")?.addEventListener("click", () => {
+  const target = document.querySelector("#processo") || document.querySelectorAll("section")[1];
+  if (target) smoothScrollTo(target);
+});
+
+/*=========================================
+MENU MOBILE
+=========================================*/
+const navToggle = document.getElementById("navToggle");
+const navDrawer = document.getElementById("navDrawer");
+
+function openDrawer() {
+  navDrawer.classList.add("open");
+  navToggle.classList.add("active");
+  navToggle.setAttribute("aria-expanded", "true");
+  document.body.classList.add("no-scroll");
+}
+function closeDrawer() {
+  navDrawer.classList.remove("open");
+  navToggle.classList.remove("active");
+  navToggle.setAttribute("aria-expanded", "false");
+  document.body.classList.remove("no-scroll");
+}
+navToggle?.addEventListener("click", () => {
+  navDrawer.classList.contains("open") ? closeDrawer() : openDrawer();
+});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
+
+/*=========================================
+CUSTOM CURSOR (apenas com mouse)
+=========================================*/
+if (hasFinePointer) {
+  const cursor = document.querySelector(".cursor");
+  let mouseX = 0, mouseY = 0, currentX = 0, currentY = 0;
+
+  window.addEventListener("mousemove", (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+  });
+
+  gsap.ticker.add(() => {
+    currentX += (mouseX - currentX) * 0.18;
+    currentY += (mouseY - currentY) * 0.18;
+    gsap.set(cursor, { x: currentX, y: currentY });
+  });
+
+  document.querySelectorAll("a,button,.gallery-item,.materials article").forEach(item => {
+    item.addEventListener("mouseenter", () => gsap.to(cursor, { scale: 2.8, duration: .35 }));
+    item.addEventListener("mouseleave", () => gsap.to(cursor, { scale: 1, duration: .35 }));
+  });
+}
+
+/*=========================================
+MAGNETIC BUTTONS (desktop apenas)
+=========================================*/
+if (hasFinePointer) {
+  document.querySelectorAll(".btn-gold,.btn-header,.btn-outline").forEach(button => {
+    button.addEventListener("mousemove", (e) => {
+      const rect = button.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      gsap.to(button, { x: x * 0.18, y: y * 0.18, duration: .35, ease: "power2.out" });
+    });
+    button.addEventListener("mouseleave", () => {
+      gsap.to(button, { x: 0, y: 0, duration: .5, ease: "elastic.out(1,.4)" });
+    });
+  });
+}
+
+/*=========================================
+TEXTO DO HERO SEGUINDO O MOUSE
+=========================================*/
+if (hasFinePointer) {
+  const heroSection = document.querySelector(".hero");
+  const heroLeft = document.querySelector(".hero-left");
+  if (heroSection && heroLeft) {
+    const moveX = gsap.quickTo(heroLeft, "x", { duration: .7, ease: "power3.out" });
+    const moveY = gsap.quickTo(heroLeft, "y", { duration: .7, ease: "power3.out" });
+    heroSection.addEventListener("mousemove", (e) => {
+      const rect = heroSection.getBoundingClientRect();
+      const px = (e.clientX - rect.left) / rect.width - .5;
+      const py = (e.clientY - rect.top) / rect.height - .5;
+      moveX(px * 22);
+      moveY(py * 14);
+    });
+    heroSection.addEventListener("mouseleave", () => { moveX(0); moveY(0); });
+  }
+}
+
+/*=========================================
+NAVBAR SCROLL STATE
+=========================================*/
+const navbar = document.querySelector(".navbar");
+ScrollTrigger.create({
+  start: 60,
+  end: 99999,
+  onUpdate: self => {
+    navbar.classList.toggle("scrolled", self.scroll() > 60);
+  }
+});
+
+/*=========================================
+HERO INTRO (texto letra por letra)
+=========================================*/
+function splitChars(el) {
+  const frag = document.createDocumentFragment();
+  el.childNodes.forEach(node => {
+    if (node.nodeType === 3) {
+      [...node.textContent].forEach(ch => {
+        const span = document.createElement("span");
+        span.className = "char";
+        span.textContent = ch === " " ? "\u00A0" : ch;
+        frag.appendChild(span);
+      });
+    } else {
+      frag.appendChild(node.cloneNode(true));
+    }
+  });
+  el.innerHTML = "";
+  el.appendChild(frag);
+  return el.querySelectorAll(".char");
+}
+
+const heroH1 = document.querySelector(".hero h1");
+const heroChars = heroH1 ? splitChars(heroH1) : [];
+
+gsap.timeline({ delay: .4 })
+  .from(".hero-sub", { y: 40, opacity: 0, duration: .7 })
+  .from(heroChars, { yPercent: 130, opacity: 0, stagger: .016, duration: 1, ease: "power4.out" }, "-=.35")
+  .from(".hero p", { y: 50, opacity: 0, duration: .8 }, "-=.6")
+  .from(".hero-buttons", { y: 40, opacity: 0, duration: .7 }, "-=.5")
+  .from("#scene3D", { scale: .8, opacity: 0, duration: 1.3, ease: "power4.out" }, "-=1")
+  .from([".hero-orbit", ".hero-blueprint"], { opacity: 0, scale: .9, duration: 1.4, ease: "power2.out" }, "-=1.1");
+
+/*=========================================
+PARALLAX HERO (desativado em telas pequenas p/ performance)
+=========================================*/
+if (!isMobile) {
+  gsap.to(".hero-bg", { yPercent: 25, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+  gsap.to("#scene3D", { yPercent: -18, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+  gsap.to(".hero-blueprint", { yPercent: 12, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+  gsap.to(".hero-orbit.o1", { yPercent: 38, rotation: 20, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+  gsap.to(".hero-orbit.o2", { yPercent: 55, rotation: -25, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+}
+
+/*=========================================
+STORY STEPS
+=========================================*/
+const storySteps = gsap.utils.toArray(".step");
+storySteps.forEach(step => {
+  ScrollTrigger.create({
+    trigger: step,
+    start: "top center",
+    end: "bottom center",
+    onEnter: () => { storySteps.forEach(s => s.classList.remove("active")); step.classList.add("active"); },
+    onEnterBack: () => { storySteps.forEach(s => s.classList.remove("active")); step.classList.add("active"); }
+  });
+});
+
+if (!isMobile) {
+  gsap.to("#wireframe", {
+    scale: 1.08,
+    rotate: 2,
+    ease: "none",
+    scrollTrigger: { trigger: ".story", start: "top top", end: "bottom bottom", scrub: true }
+  });
+}
+
+/*=========================================
+TIMELINE ITEMS
+=========================================*/
+gsap.utils.toArray(".timeline-item").forEach((item, i) => {
+  gsap.from(item, {
+    opacity: 0,
+    x: isMobile ? 0 : (i % 2 === 0 ? -80 : 80),
+    y: isMobile ? 40 : 0,
+    duration: 1,
+    ease: "power3.out",
+    scrollTrigger: { trigger: item, start: "top 85%" }
+  });
+});
+
+/*=========================================
+NUMBERS COUNT-UP
+=========================================*/
+document.querySelectorAll(".number .num-value").forEach(el => {
+  const finalValue = el.innerText.trim();
+  const numeric = parseInt(finalValue, 10);
+  if (!isNaN(numeric) && String(numeric) === finalValue) {
+    const counter = { value: 0 };
+    gsap.to(counter, {
+      value: numeric,
+      duration: 2,
+      ease: "power2.out",
+      onUpdate: () => { el.innerText = Math.round(counter.value); },
+      scrollTrigger: { trigger: el, start: "top 85%" }
+    });
+  }
+});
+
+/*=========================================
+CARDS TILT (desktop apenas)
+=========================================*/
+if (hasFinePointer) {
+  document.querySelectorAll(".materials article, .gallery-item, .number").forEach(card => {
+    card.addEventListener("mousemove", e => {
+      const rect = card.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - .5;
+      const y = (e.clientY - rect.top) / rect.height - .5;
+      gsap.to(card, { rotateY: x * 10, rotateX: -y * 10, transformPerspective: 1200, duration: .35, ease: "power2.out" });
+    });
+    card.addEventListener("mouseleave", () => {
+      gsap.to(card, { rotateX: 0, rotateY: 0, duration: .6, ease: "power3.out" });
+    });
+  });
+}
+
+/*=========================================
+GALLERY & MATERIAL REVEALS
+=========================================*/
+gsap.utils.toArray(".gallery-item").forEach(item => {
+  gsap.from(item, { scale: .85, opacity: 0, duration: 1, ease: "power3.out", scrollTrigger: { trigger: item, start: "top 90%" } });
+});
+
+gsap.utils.toArray(".materials article").forEach((card, i) => {
+  gsap.from(card, { y: 80, opacity: 0, delay: i * .08, duration: .9, ease: "power3.out", scrollTrigger: { trigger: card, start: "top 85%" } });
+});
+
+gsap.utils.toArray(".section-title").forEach(title => {
+  gsap.from(title.children, { opacity: 0, y: 40, stagger: .15, duration: .8, ease: "power2.out", scrollTrigger: { trigger: title, start: "top 85%" } });
+});
+
+/*=========================================
+CTA
+=========================================*/
+gsap.from(".cta h2", { y: 60, opacity: 0, duration: 1, scrollTrigger: { trigger: ".cta", start: "top 75%" } });
+gsap.from(".cta p", { y: 40, opacity: 0, delay: .2, duration: .8, scrollTrigger: { trigger: ".cta", start: "top 75%" } });
+gsap.from(".cta-buttons", { y: 30, opacity: 0, delay: .4, duration: .8, scrollTrigger: { trigger: ".cta", start: "top 75%" } });
+
+if (hasFinePointer) {
+  gsap.to(".cta .btn-gold", { scale: 1.03, repeat: -1, yoyo: true, duration: 1.6, ease: "power1.inOut" });
+}
+
+/*=========================================
+FOOTER
+=========================================*/
+gsap.from("footer .footer-grid > div", {
+  opacity: 0, y: 60, stagger: .15, duration: 1, ease: "power3.out",
+  scrollTrigger: { trigger: "footer", start: "top 85%" }
+});
+
+/*=========================================
+SEÇÕES: fade suave ao entrar na tela
+=========================================*/
+gsap.utils.toArray("section").forEach(section => {
+  gsap.from(section, { opacity: 0, duration: 1, scrollTrigger: { trigger: section, start: "top 92%" } });
+});
+
+/*=========================================
+SPOTLIGHT (desktop apenas)
+=========================================*/
+if (hasFinePointer) {
+  const spotlight = document.createElement("div");
+  spotlight.className = "spotlight";
+  document.body.appendChild(spotlight);
+  window.addEventListener("mousemove", (e) => {
+    gsap.to(spotlight, { x: e.clientX, y: e.clientY, duration: .4, ease: "power2.out" });
+  });
+}
+
+/*=========================================
+BRILHO DO HERO
+=========================================*/
+gsap.to(".hero-glow", { rotation: 360, repeat: -1, duration: 35, ease: "none" });
+gsap.to("#wireframe", { borderColor: "rgba(200,163,77,.4)", repeat: -1, yoyo: true, duration: 2 });
+gsap.to("#showroom3D", { boxShadow: "0 0 120px rgba(200,163,77,.25)", repeat: -1, yoyo: true, duration: 3 });
+
+/*=========================================
+SCROLL PROGRESS BAR
+=========================================*/
+const progress = document.createElement("div");
+progress.className = "scroll-progress";
+document.body.appendChild(progress);
+
+let progressTicking = false;
+function updateProgress() {
+  const scrollTop = window.scrollY;
+  const height = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (height > 0 ? (scrollTop / height) * 100 : 0) + "%";
+  progressTicking = false;
+}
+window.addEventListener("scroll", () => {
+  if (!progressTicking) {
+    requestAnimationFrame(updateProgress);
+    progressTicking = true;
+  }
+}, { passive: true });
+updateProgress();
+
+/*=========================================
+NAVEGAÇÃO ATIVA
+=========================================*/
+const sections = document.querySelectorAll("main section[id], section[id]");
+const navLinks = document.querySelectorAll("nav a, .nav-drawer a");
+
+let navTicking = false;
+function updateActiveNav() {
+  let current = "";
+  sections.forEach(section => {
+    const top = section.offsetTop - 180;
+    if (window.scrollY >= top) current = section.getAttribute("id");
+  });
+  navLinks.forEach(link => {
+    link.classList.toggle("active", link.getAttribute("href") === "#" + current);
+  });
+  navTicking = false;
+}
+window.addEventListener("scroll", () => {
+  if (!navTicking) {
+    requestAnimationFrame(updateActiveNav);
+    navTicking = true;
+  }
+}, { passive: true });
+updateActiveNav();
+
+/*=========================================
+BOTÃO RIPPLE
+=========================================*/
+document.querySelectorAll(".btn-gold").forEach(button => {
+  button.addEventListener("click", function (e) {
+    const ripple = document.createElement("span");
+    const rect = this.getBoundingClientRect();
+    ripple.style.left = (e.clientX - rect.left) + "px";
+    ripple.style.top = (e.clientY - rect.top) + "px";
+    ripple.classList.add("ripple");
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 650);
+  });
+});
+
+/*=========================================
+CENA 3D: CONSTRUÇÃO PROGRESSIVA DA COZINHA
+=========================================*/
+gsap.timeline({
+  scrollTrigger: { trigger: ".story", start: "top top", end: "bottom bottom", scrub: 1 }
+})
+  .to("#wireframe .iso-cabinets", { opacity: 1, duration: .3 }, 0)
+  .to("#wireframe .iso-counters", { opacity: 1, duration: .3 }, .16)
+  .to("#wireframe .iso-island", { opacity: 1, duration: .3 }, .36)
+  .to("#wireframe .iso-wallcab", { opacity: 1, duration: .3 }, .54)
+  .to("#wireframe .iso-pendants", { opacity: 1, duration: .3 }, .7)
+  .to("#wireframe .iso-pendant-bulb", { opacity: 1, duration: .25 }, .86)
+  .to("#wireframe .iso-glow", { opacity: .55, duration: .25 }, .86);
+
+/*=========================================
+TILT 3D SUTIL SEGUINDO O MOUSE (hero e showroom)
+=========================================*/
+function addSceneTilt(containerSelector, maxDeg) {
+  if (!hasFinePointer) return;
+  const container = document.querySelector(containerSelector);
+  const tilt = container ? container.querySelector(".iso-tilt") : null;
+  if (!container || !tilt) return;
+
+  const setX = gsap.quickTo(tilt, "rotationY", { duration: .7, ease: "power3.out" });
+  const setY = gsap.quickTo(tilt, "rotationX", { duration: .7, ease: "power3.out" });
+
+  container.addEventListener("mousemove", e => {
+    const r = container.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - .5;
+    const py = (e.clientY - r.top) / r.height - .5;
+    setX(px * maxDeg);
+    setY(-py * maxDeg);
+  });
+  container.addEventListener("mouseleave", () => { setX(0); setY(0); });
+}
+addSceneTilt("#scene3D", 9);
+addSceneTilt("#showroom3D", 7);
+
+if (!reduceMotion) {
+  gsap.to("#scene3D .iso-tilt", { y: -10, duration: 3.2, yoyo: true, repeat: -1, ease: "sine.inOut" });
+}
+
+/*=========================================
+ANTES E DEPOIS (arraste, com suporte a toque)
+=========================================*/
+const compareEl = document.getElementById("compareKitchen");
+const compareRange = compareEl ? compareEl.querySelector(".compare-range") : null;
+if (compareEl && compareRange) {
+  const setReveal = v => compareEl.style.setProperty("--reveal", v + "%");
+  setReveal(compareRange.value);
+  compareRange.addEventListener("input", () => setReveal(compareRange.value));
+
+  gsap.from(compareEl, {
+    opacity: 0, y: 50, duration: 1, ease: "power3.out",
+    scrollTrigger: { trigger: compareEl, start: "top 85%" }
+  });
+}
+
+/*=========================================
+NOTEBOOK 3D — abre conforme o scroll
+=========================================*/
+const laptopScreen = document.querySelector(".laptop-screen");
+if (laptopScreen) {
+  gsap.to(laptopScreen, {
+    rotateX: -14,
+    ease: "none",
+    scrollTrigger: {
+      trigger: ".laptop-stage",
+      start: "top 85%",
+      end: "top 25%",
+      scrub: .6
+    }
+  });
+
+  if (!reduceMotion) {
+    gsap.to(".laptop-stage", { y: -12, duration: 3.4, yoyo: true, repeat: -1, ease: "sine.inOut", delay: 1 });
+  }
+}
+
+/*=========================================
+GALERIA — LIGHTBOX COM ZOOM CINEMATOGRÁFICO
+=========================================*/
+(function initLightbox() {
+  const lightbox = document.getElementById("lightbox");
+  const inner = document.getElementById("lightboxInner");
+  const caption = document.getElementById("lightboxCaption");
+  const closeBtn = document.getElementById("lightboxClose");
+  if (!lightbox || !inner) return;
+
+  let lastRect = null;
+
+  function openLightbox(item) {
+    const img = item.querySelector("img");
+    if (!img) return;
+    lastRect = item.getBoundingClientRect();
+    caption.textContent = item.getAttribute("data-caption") || "";
+
+    inner.innerHTML = "";
+    const cloneImg = img.cloneNode(true);
+    inner.appendChild(cloneImg);
+    inner.appendChild(caption);
+
+    lightbox.style.display = "flex";
+
+    gsap.set(inner, {
+      position: "fixed",
+      top: lastRect.top, left: lastRect.left,
+      width: lastRect.width, height: lastRect.height,
+      xPercent: 0, yPercent: 0,
+      borderRadius: 24
+    });
+
+    requestAnimationFrame(() => {
+      lightbox.classList.add("active");
+      const vw = Math.min(window.innerWidth * .92, 1100);
+      const vh = Math.min(window.innerHeight * .82, vw * 9 / 16);
+      gsap.to(inner, {
+        top: "50%", left: "50%",
+        xPercent: -50, yPercent: -50,
+        width: vw, height: vh,
+        borderRadius: 20,
+        duration: .8, ease: "power4.out"
+      });
+    });
+  }
+
+  function closeLightbox() {
+    if (!lastRect) return;
+    gsap.to(inner, {
+      top: lastRect.top, left: lastRect.left,
+      xPercent: 0, yPercent: 0,
+      width: lastRect.width, height: lastRect.height,
+      borderRadius: 24,
+      duration: .6, ease: "power3.inOut",
+      onComplete: () => {
+        lightbox.classList.remove("active");
+        lightbox.style.display = "none";
+      }
+    });
+  }
+
+  document.querySelectorAll(".gallery-item").forEach(item => {
+    if (!item.querySelector("img")) return;
+    item.addEventListener("click", () => openLightbox(item));
+  });
+  closeBtn.addEventListener("click", closeLightbox);
+  lightbox.addEventListener("click", e => { if (e.target === lightbox) closeLightbox(); });
+  document.addEventListener("keydown", e => { if (e.key === "Escape") closeLightbox(); });
+})();
+
+/*=========================================
+PARTÍCULAS DE FUNDO (reduzidas no mobile)
+=========================================*/
+if (!reduceMotion) {
+  const particles = document.createElement("div");
+  particles.className = "particles";
+  document.body.appendChild(particles);
+  const count = isMobile ? 14 : 30;
+  for (let i = 0; i < count; i++) {
+    const dot = document.createElement("span");
+    dot.style.left = Math.random() * 100 + "%";
+    dot.style.top = Math.random() * 100 + "%";
+    dot.style.animationDelay = (Math.random() * 9) + "s";
+    particles.appendChild(dot);
+  }
+}
+
+console.log("%cFlash Stock Premium Loaded", "color:#C8A34D;font-size:18px;font-weight:bold");
+</script>
+
+</body>
+</html>

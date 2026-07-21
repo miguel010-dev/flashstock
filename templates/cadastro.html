@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Painel de Cadastro | Flash Stock</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050C17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="{{ url_for('index') }}" class="logo">
+      <span class="logo-fallback" style="color:var(--gold);font-family:'Montserrat',sans-serif;font-weight:800;">FLASH STOCK</span>
+    </a>
+    <div class="header-actions">
+      <a href="{{ url_for('index') }}" class="btn-outline" style="padding:10px 22px;">Ver Site</a>
+      <a href="{{ url_for('logout') }}" class="btn-header">Sair</a>
+    </div>
+  </div>
+</header>
+
+<main class="admin-shell">
+  <div class="container">
+    <div class="admin-header">
+      <h1>Painel de Cadastro</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for categoria, msg in messages %}
+          <div class="alert {{ categoria }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="admin-tabs">
+      <button type="button" class="admin-tab {{ 'active' if not produto_edicao }}" onclick="mostrarTab('lista')" id="tabBtnLista">Produtos Cadastrados</button>
+      <button type="button" class="admin-tab {{ 'active' if produto_edicao }}" onclick="mostrarTab('form')" id="tabBtnForm">{{ 'Editar Produto' if produto_edicao else 'Novo Produto' }}</button>
+    </div>
+
+    <div class="tab-content {{ 'active' if not produto_edicao }}" id="tab-lista">
+      <div class="glass-card table-wrap">
+        {% if produtos %}
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Foto</th><th>Nome</th><th>Categoria</th><th>Dimensões (L x A x P)</th><th>Status</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in produtos %}
+            <tr>
+              <td>
+                {% if p.capa %}<img src="{{ url_for('static', filename='uploads/' ~ p.capa) }}" alt="{{ p.nome }}">
+                {% else %}<div style="width:52px;height:52px;border-radius:8px;background:#0b1b32;"></div>{% endif %}
+              </td>
+              <td>{{ p.nome }}</td>
+              <td>{{ p.categoria }}</td>
+              <td>{{ p.largura_min }}-{{ p.largura_max }} / {{ p.altura_min }}-{{ p.altura_max }} / {{ p.profundidade_min }}-{{ p.profundidade_max }} cm</td>
+              <td>{{ 'Ativo' if p.ativo else 'Inativo' }}{% if p.destaque %} · Destaque{% endif %}</td>
+              <td>
+                <div class="row-actions">
+                  <a href="{{ url_for('cadastro_editar_form', produto_id=p.id) }}">Editar</a>
+                  <a href="{{ url_for('produto_detalhe', produto_id=p.id) }}" target="_blank">Ver</a>
+                  <form method="POST" action="{{ url_for('cadastro_excluir', produto_id=p.id) }}" onsubmit="return confirm('Excluir este produto e todas as suas imagens?');" style="display:inline;">
+                    <button type="submit" class="del">Excluir</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state"><h3>Nenhum produto cadastrado</h3><p>Use a aba "Novo Produto" para começar.</p></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="tab-content {{ 'active' if produto_edicao }}" id="tab-form">
+      <div class="glass-card">
+        <h2 style="font-family:'Montserrat',sans-serif;margin-bottom:24px;font-size:1.3rem;">
+          {{ 'Editar: ' ~ produto_edicao.nome if produto_edicao else 'Cadastrar Novo Móvel Planejado' }}
+        </h2>
+
+        <form method="POST"
+              action="{{ url_for('cadastro_editar', produto_id=produto_edicao.id) if produto_edicao else url_for('cadastro_novo') }}"
+              enctype="multipart/form-data">
+
+          <div class="field-row">
+            <div class="field">
+              <label>Nome do Produto</label>
+              <input type="text" name="nome" required placeholder="Ex: Cozinha Planejada Aurora" value="{{ produto_edicao.nome if produto_edicao else '' }}">
+            </div>
+            <div class="field">
+              <label>Categoria</label>
+              <select name="categoria">
+                {% for c in categorias %}
+                <option value="{{ c }}" {{ 'selected' if produto_edicao and produto_edicao.categoria == c }}>{{ c }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>Descrição</label>
+            <textarea name="descricao" placeholder="Detalhes do projeto, diferenciais, funcionalidades...">{{ produto_edicao.descricao if produto_edicao else '' }}</textarea>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Material</label>
+              <input type="text" name="material" placeholder="Ex: MDF 18mm" value="{{ produto_edicao.material if produto_edicao else '' }}">
+            </div>
+            <div class="field">
+              <label>Acabamento</label>
+              <input type="text" name="acabamento" placeholder="Ex: Fosco Nogueira" value="{{ produto_edicao.acabamento if produto_edicao else '' }}">
+            </div>
+          </div>
+
+          <p style="color:var(--gold-light);font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin:24px 0 12px;">Dimensões sob medida (cm)</p>
+          <div class="field-row-3">
+            <div class="field">
+              <label>Largura mínima</label>
+              <input type="number" step="0.1" name="largura_min" value="{{ produto_edicao.largura_min if produto_edicao else '' }}">
+            </div>
+            <div class="field">
+              <label>Largura máxima</label>
+              <input type="number" step="0.1" name="largura_max" value="{{ produto_edicao.largura_max if produto_edicao else '' }}">
+            </div>
+            <div class="field"></div>
+          </div>
+          <div class="field-row-3">
+            <div class="field">
+              <label>Altura mínima</label>
+              <input type="number" step="0.1" name="altura_min" value="{{ produto_edicao.altura_min if produto_edicao else '' }}">
+            </div>
+            <div class="field">
+              <label>Altura máxima</label>
+              <input type="number" step="0.1" name="altura_max" value="{{ produto_edicao.altura_max if produto_edicao else '' }}">
+            </div>
+            <div class="field"></div>
+          </div>
+          <div class="field-row-3">
+            <div class="field">
+              <label>Profundidade mínima</label>
+              <input type="number" step="0.1" name="profundidade_min" value="{{ produto_edicao.profundidade_min if produto_edicao else '' }}">
+            </div>
+            <div class="field">
+              <label>Profundidade máxima</label>
+              <input type="number" step="0.1" name="profundidade_max" value="{{ produto_edicao.profundidade_max if produto_edicao else '' }}">
+            </div>
+            <div class="field"></div>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>Preço estimado (R$, a partir de)</label>
+              <input type="number" step="0.01" name="preco_estimado" value="{{ produto_edicao.preco_estimado if produto_edicao and produto_edicao.preco_estimado else '' }}">
+            </div>
+            <div class="field">
+              <label>Prazo de produção (dias)</label>
+              <input type="number" step="1" name="prazo_producao_dias" value="{{ produto_edicao.prazo_producao_dias if produto_edicao and produto_edicao.prazo_producao_dias else '' }}">
+            </div>
+          </div>
+
+          <div class="field-row">
+            <div class="field" style="display:flex;align-items:center;gap:10px;">
+              <input type="checkbox" name="destaque" id="destaque" style="width:auto;" {{ 'checked' if produto_edicao and produto_edicao.destaque }}>
+              <label for="destaque" style="margin:0;">Marcar como destaque</label>
+            </div>
+            <div class="field" style="display:flex;align-items:center;gap:10px;">
+              <input type="checkbox" name="ativo" id="ativo" style="width:auto;" {{ 'checked' if (not produto_edicao) or produto_edicao.ativo }}>
+              <label for="ativo" style="margin:0;">Visível no catálogo (ativo)</label>
+            </div>
+          </div>
+
+          {% if imagens_edicao %}
+          <p style="color:var(--gold-light);font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin:24px 0 12px;">Fotos atuais</p>
+          <div class="preview-grid">
+            {% for img in imagens_edicao %}
+            <div class="prev-item">
+              <img src="{{ url_for('static', filename='uploads/' ~ img.filename) }}" alt="Foto do produto">
+              <label style="position:absolute;bottom:2px;left:2px;background:rgba(0,0,0,.65);border-radius:6px;padding:2px 6px;font-size:10px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+                <input type="checkbox" name="excluir_imagem" value="{{ img.id }}" style="width:auto;margin:0;"> excluir
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <p style="color:var(--gold-light);font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin:24px 0 12px;">Adicionar fotos (permite várias)</p>
+          <div class="upload-drop" id="uploadDrop">
+            <input type="file" name="imagens" id="inputImagens" multiple accept="image/png,image/jpeg,image/webp,image/gif">
+            <span id="uploadLabel">Clique ou arraste as imagens do produto aqui</span>
+          </div>
+          <div class="preview-grid" id="previewNovas"></div>
+
+          <div style="display:flex;gap:16px;margin-top:32px;flex-wrap:wrap;">
+            <button type="submit" class="btn-gold">{{ 'Salvar Alterações' if produto_edicao else 'Cadastrar Produto' }}</button>
+            {% if produto_edicao %}<a href="{{ url_for('cadastro') }}" class="btn-outline">Cancelar Edição</a>{% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+function mostrarTab(nome){
+  document.getElementById('tab-lista').classList.toggle('active', nome === 'lista');
+  document.getElementById('tab-form').classList.toggle('active', nome === 'form');
+  document.getElementById('tabBtnLista').classList.toggle('active', nome === 'lista');
+  document.getElementById('tabBtnForm').classList.toggle('active', nome === 'form');
+}
+
+var inputImagens = document.getElementById('inputImagens');
+var previewNovas = document.getElementById('previewNovas');
+var uploadLabel = document.getElementById('uploadLabel');
+if (inputImagens) {
+  inputImagens.addEventListener('change', function () {
+    previewNovas.innerHTML = '';
+    var arquivos = Array.from(inputImagens.files);
+    uploadLabel.textContent = arquivos.length ? (arquivos.length + ' arquivo(s) selecionado(s)') : 'Clique ou arraste as imagens do produto aqui';
+    arquivos.forEach(function (file) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var div = document.createElement('div');
+        div.className = 'prev-item';
+        div.innerHTML = '<img src="' + e.target.result + '" alt="Prévia">';
+        previewNovas.appendChild(div);
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+}
+</script>
+<script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Catálogo | Flash Stock Móveis Planejados</title>
+<meta name="description" content="Catálogo completo de móveis planejados: cozinhas, closets, dormitórios, home office e mais.">
+<meta name="theme-color" content="#050C17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+</head>
+<body>
+
+<header class="navbar">
+  <div class="container">
+    <a href="{{ url_for('index') }}" class="logo">
+      <img src="{{ url_for('static', filename='assets/logo.png') }}" alt="Flash Stock" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span class="logo-fallback" style="display:none;">FLASH STOCK</span>
+    </a>
+    <nav class="main-nav">
+      <a href="{{ url_for('index') }}">Início</a>
+      <a href="{{ url_for('catalogo') }}" class="active">Catálogo</a>
+      <a href="{{ url_for('sobre') }}">Sobre</a>
+      <a href="{{ url_for('index') }}#cta">Contato</a>
+    </nav>
+    <div class="header-actions">
+      <a href="{{ url_for('index') }}#cta" class="btn-header">Solicitar Projeto</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Abrir menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-drawer" id="navDrawer">
+  <a href="{{ url_for('index') }}">Início</a>
+  <a href="{{ url_for('catalogo') }}">Catálogo</a>
+  <a href="{{ url_for('sobre') }}">Sobre</a>
+  <a href="{{ url_for('index') }}#cta">Contato</a>
+  <a href="{{ url_for('index') }}#cta" class="btn-gold">Solicitar Projeto</a>
+</nav>
+
+<main>
+
+<section class="page-hero" style="padding-bottom:60px;">
+  <div class="container">
+    <span class="eyebrow">CATÁLOGO</span>
+    <h1>Projetos planejados<br>prontos para o seu espaço.</h1>
+    <p>Cada item do catálogo é um ponto de partida sob medida — largura, altura e profundidade são sempre ajustadas ao seu ambiente.</p>
+  </div>
+</section>
+
+<section style="padding-top:0;">
+  <div class="container">
+    <div class="filter-bar">
+      <a href="{{ url_for('catalogo') }}" class="filter-chip {{ 'active' if not categoria_atual }}">Todos</a>
+      {% for c in categorias %}
+      <a href="{{ url_for('catalogo', categoria=c) }}" class="filter-chip {{ 'active' if categoria_atual == c }}">{{ c }}</a>
+      {% endfor %}
+    </div>
+
+    {% if produtos %}
+    <div class="grid-3" style="grid-template-columns:repeat(3,1fr);">
+      {% for p in produtos %}
+      <a href="{{ url_for('produto_detalhe', produto_id=p.id) }}" class="produto-card">
+        <div class="thumb">
+          {% if p.destaque %}<span class="badge">Destaque</span>{% endif %}
+          {% if p.capa %}
+          <img src="{{ url_for('static', filename='uploads/' ~ p.capa) }}" alt="{{ p.nome }}" loading="lazy">
+          {% else %}
+          <div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#4a5a78;">Sem imagem</div>
+          {% endif %}
+        </div>
+        <div class="info">
+          <span class="categoria">{{ p.categoria }}</span>
+          <h3>{{ p.nome }}</h3>
+          <p class="desc">{{ p.descricao[:110] }}{% if p.descricao|length > 110 %}...{% endif %}</p>
+          {% if p.preco_estimado %}<span class="preco">A partir de R$ {{ '%.2f'|format(p.preco_estimado)|replace('.', ',') }}</span>{% endif %}
+          <div class="ver-mais">Ver detalhes <span>&rarr;</span></div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h3>Nenhum projeto encontrado</h3>
+      <p>Ainda não há produtos cadastrados nesta categoria. Volte em breve para conferir novidades.</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>&copy; {{ ano }} Flash Stock Móveis Planejados. Todos os direitos reservados.</p>
+    <p style="margin-top:8px;"><a href="{{ url_for('sobre') }}">Sobre Nós</a> · <a href="{{ url_for('index') }}#cta">Contato</a> · <a href="{{ url_for('login') }}">Área Restrita</a></p>
+  </div>
+</footer>
+
+<a href="https://wa.me/5511969183002" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Falar no WhatsApp">
+  <svg viewBox="0 0 24 24"><path d="M17.5 14.4c-.3-.1-1.7-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1-.3-.1-1.2-.5-2.3-1.5-.9-.8-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.1.2-.3.3-.4.1-.2 0-.4 0-.5 0-.1-.7-1.7-1-2.3-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.2 3.4 5.3 4.7.7.3 1.3.5 1.8.6.7.2 1.4.2 1.9.1.6-.1 1.7-.7 1.9-1.4.2-.7.2-1.3.2-1.4-.1-.2-.3-.3-.6-.4z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.2-1.4A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.5-1.2l-.3-.2-3.2.8.8-3.1-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
+</a>
+
+<script src="{{ url_for('static', filename='js/shared.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Área Restrita | Flash Stock</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050C17">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/shared.css') }}">
+</head>
+<body>
+<main class="form-page">
+  <div class="form-card glass-card">
+    <div class="logo-form">FLASH STOCK</div>
+    <h2 style="text-align:center;font-family:'Montserrat',sans-serif;font-size:1.3rem;margin-bottom:28px;font-weight:600;">Área Restrita</h2>
+
+    {% if erro %}<div class="alert error">{{ erro }}</div>{% endif %}
+
+    <form method="POST" action="{{ url_for('login') }}">
+      <div class="field">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" name="email" required autocomplete="username" placeholder="seuemail@exemplo.com">
+      </div>
+      <div class="field">
+        <label for="senha">Senha</label>
+        <input type="password" id="senha" name="senha" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-gold" style="width:100%;margin-top:8px;">Entrar</button>
+    </form>
+
+    <p style="text-align:center;margin-top:24px;"><a href="{{ url_for('index') }}" style="color:#8A93A6;font-size:13px;">&larr; Voltar ao site</a></p>
+  </div>
+</main>
+</body>
+</html>
